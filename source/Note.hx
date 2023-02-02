@@ -19,6 +19,9 @@ typedef EventNote = {
 
 class Note extends FlxSprite
 {
+	//add these 2 variables for the renderer
+	public var mesh:flixel.FlxStrip = null; 
+	public var z:Float = 0;
 	public var extraData:Map<String,Dynamic> = [];
 
 	public var strumTime:Float = 0;
