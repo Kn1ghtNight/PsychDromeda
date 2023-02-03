@@ -701,25 +701,3 @@ class BrakeModifier extends Modifier
         return curPos+yOffset;
     }
 }
-
-
-class JumpModifier extends Modifier //custom thingy i made
-{
-    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
-    {
-        strumMath(noteData, lane, pf);
-    }
-    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
-    {
-        var beatVal = Modifier.beat - Math.floor(Modifier.beat); //should give decimal
-
-        var scrollSwitch = 1;
-        if (instance != null)
-            if (ModchartUtil.getDownscroll(instance))
-                scrollSwitch = -1;
-
-        
-
-        noteData.y += (beatVal*(Conductor.stepCrochet*currentValue))*ModchartUtil.getScrollSpeed(instance)*0.45*scrollSwitch;
-    }
-}

@@ -6,6 +6,7 @@ import Discord.DiscordClient;
 #end
 import Section.SwagSection;
 import Song.SwagSong;
+import WiggleEffect;
 import WiggleEffect.WiggleEffectType;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
@@ -125,6 +126,9 @@ class PlayState extends MusicBeatState
 	public var modchartSaves:Map<String, FlxSave> = new Map();
 	#end
 
+	var filtersnotes:Array<BitmapFilter> = [];
+    var filterSUSnotes:Array<BitmapFilter> = [];
+
 	public var BF_X:Float = 770;
 	public var BF_Y:Float = 100;
 	public var DAD_X:Float = 100;
@@ -157,6 +161,9 @@ class PlayState extends MusicBeatState
 	public var dad:Character = null;
 	public var gf:Character = null;
 	public var boyfriend:Boyfriend = null;
+	public var dadReflect:Character = null;
+	public var gfReflect:Character = null;
+	public var bfReflect:Character = null;
 
 	public var notes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<Note> = [];
@@ -219,6 +226,9 @@ class PlayState extends MusicBeatState
 	public var camHUD:FlxCamera;
 	public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
+	public var camNOTES:FlxCamera;
+    public var camSus:FlxCamera; // GET OUT OF MY HEAD!!! AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA - PurSnake
+    public var camNOTEHUD:FlxCamera;
 	public var cameraSpeed:Float = 1;
 
 	var dialogue:Array<String> = ['blah blah blah', 'coolswag'];
@@ -260,6 +270,7 @@ class PlayState extends MusicBeatState
 
 	var bgGirls:BackgroundGirls;
 	var wiggleShit:WiggleEffect = new WiggleEffect();
+	var susWiggle:ShaderFilter;
 	var bgGhouls:BGSprite;
 
 	var tankWatchtower:BGSprite;
@@ -397,15 +408,27 @@ class PlayState extends MusicBeatState
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
+		camSus = new FlxCamera();
+		camSus.bgColor.alpha = 0;
 		camHUD = new FlxCamera();
 		camOther = new FlxCamera();
+        camNOTES = new FlxCamera();
+		camNOTES.bgColor = 0;
+		camNOTEHUD = new FlxCamera();
+		camNOTEHUD.bgColor = 0;
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camNOTEHUD, false);
+		FlxG.cameras.add(camSus, false);
+		FlxG.cameras.add(camNOTES, false);
 		FlxG.cameras.add(camOther, false);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
+
+		camSus.setFilters(filterSUSnotes); 
+		camSus.filtersEnabled = true;
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 		CustomFadeTransition.nextCamera = camOther;
@@ -519,7 +542,7 @@ class PlayState extends MusicBeatState
 				var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
 				add(bg);
 
-				var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
+				var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.95, 0.95);
 				stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
 				stageFront.updateHitbox();
 				add(stageFront);
@@ -1070,6 +1093,24 @@ class PlayState extends MusicBeatState
 		add(timeTxt);
 		timeBarBG.sprTracker = timeBar;
 
+		// le wiggle
+		wiggleShit.waveAmplitude = 0.07;
+		wiggleShit.effectType = WiggleEffectType.DREAMY;
+		wiggleShit.waveFrequency = 0;
+		wiggleShit.waveSpeed = 1.8; // fasto
+		wiggleShit.shader.uTime.value = [(strumLine.y - Note.swagWidth * 4) / FlxG.height]; // from 4mbr0s3 2
+		susWiggle = new ShaderFilter(wiggleShit.shader);
+		// le wiggle 2
+		var wiggleShit2:WiggleEffect = new WiggleEffect();
+		wiggleShit2.waveAmplitude = 0.10;
+		wiggleShit2.effectType = WiggleEffectType.HEAT_WAVE_VERTICAL;
+		wiggleShit2.waveFrequency = 0;
+		wiggleShit2.waveSpeed = 1.8; // fasto
+		wiggleShit2.shader.uTime.value = [(strumLine.y - Note.swagWidth * 4) / FlxG.height]; // from 4mbr0s3 2
+		var susWiggle2 = new ShaderFilter(wiggleShit2.shader);
+
+		filterSUSnotes.push(susWiggle); // only enable it for snake notes
+
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
 		add(grpNoteSplashes);
@@ -1176,9 +1217,9 @@ class PlayState extends MusicBeatState
 			botplayTxt.y = timeBarBG.y - 78;
 		}
 
-		strumLineNotes.cameras = [camHUD];
-		grpNoteSplashes.cameras = [camHUD];
-		notes.cameras = [camHUD];
+		strumLineNotes.cameras = [camNOTEHUD];
+		grpNoteSplashes.cameras = [camNOTEHUD];
+		notes.cameras = [camNOTES];
 		healthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
 		iconP1.cameras = [camHUD];
@@ -3049,6 +3090,10 @@ class PlayState extends MusicBeatState
 		setOnLuas('curDecStep', curDecStep);
 		setOnLuas('curDecBeat', curDecBeat);
 
+        wiggleShit.waveAmplitude = FlxMath.lerp(wiggleShit.waveAmplitude, 0, 0.035 / (ClientPrefs.framerate / 75));
+ 		wiggleShit.waveFrequency = FlxMath.lerp(wiggleShit.waveFrequency, 0, 0.035 / (ClientPrefs.framerate / 75));
+
+		wiggleShit.update(elapsed);
 		if(botplayTxt.visible) {
 			botplaySine += 180 * elapsed;
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
@@ -3077,7 +3122,7 @@ class PlayState extends MusicBeatState
 		var mult:Float = FlxMath.lerp(1.1, iconP2.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
 		iconP2.scale.set(mult, mult);
 		iconP2.updateHitbox();
-		
+
 		var iconOffset:Int = 26;
 
 		iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * iconP1.scale.x - 150) / 2 - iconOffset;
@@ -3202,6 +3247,9 @@ class PlayState extends MusicBeatState
 				{
 					var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
 					if(!daNote.mustPress) strumGroup = opponentStrums;
+
+					if (daNote.isSustainNote)
+						daNote.cameras = [camSus];
 
 					var strumX:Float = strumGroup.members[daNote.noteData].x;
 					var strumY:Float = strumGroup.members[daNote.noteData].y;
