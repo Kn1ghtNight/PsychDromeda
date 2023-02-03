@@ -1,4 +1,4 @@
-# PsychDromeda, A shitty psych fork that has some cool shit ig (sorta like ice engine but not)
+# PsychDromeda, A *sort of* recreation of sacorg engine (basically ice engine 2 electric boogaloo)
 
 ## Features
 a ***"better"*** modcharting api (thank you TheZoroForce240)
