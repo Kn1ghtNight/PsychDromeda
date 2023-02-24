@@ -1,6 +1,3 @@
 # PsychDromeda, A *sort of* recreation of sacorg engine (basically ice engine 2 electric boogaloo)
 
-## Features
-a ***"better"*** modcharting api (thank you TheZoroForce240)
-smoother camera (yeah thats one ig)
-and more to come!!!!!
+## THIS IS OUTDATED PLEASE GO TO [PsychVanced](https://github.com/Kn1ghtNight/PsychVanced)
